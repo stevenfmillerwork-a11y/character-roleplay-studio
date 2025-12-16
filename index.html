@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Character Roleplay Studio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #15192a 0, #05060b 55%);
+      color: #f5f5f5;
+      display: flex;
+      justify-content: center;
+    }
+    .app {
+      max-width: 960px;
+      width: 100%;
+      padding: 14px;
+      box-sizing: border-box;
+    }
+    h1 {
+      font-size: 20px;
+      margin: 0 0 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .subtitle {
+      font-size: 12px;
+      color: #a6b4ff;
+      margin-bottom: 12px;
+    }
+    .panel {
+      background: rgba(11, 12, 20, 0.96);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      box-shadow: 0 0 0 1px #242736;
+    }
+    .panel h2 {
+      margin: 0 0 6px;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .panel-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+    .panel-header-row span {
+      font-size: 12px;
+      color: #9aa5d0;
+    }
+    input[type="text"],
+    textarea {
+      width: 100%;
+      padding: 7px 8px;
+      border-radius: 6px;
+      border: 1px solid #32384b;
+      background: #070914;
+      color: #f5f5f5;
+      box-sizing: border-box;
+      font-size: 13px;
+      resize: vertical;
+    }
+    textarea {
+      min-height: 70px;
+    }
+    input[type="text"]::placeholder,
+    textarea::placeholder {
+      color: #626a85;
+    }
+    button {
+      border-radius: 6px;
+      border: none;
+      padding: 7px 10px;
+      margin-top: 6px;
+      background: linear-gradient(135deg, #3a7afe, #6a5bff);
+      color: white;
+      cursor: pointer;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    button.secondary {
+      background: #262b3f;
+    }
+    button.ghost {
+      background: transparent;
+      box-shadow: 0 0 0 1px #34374b;
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+    .status {
+      font-size: 11px;
+      margin-top: 4px;
+      color: #c0ccff;
+    }
+    .preview {
+      width: 100%;
+      max-height: 260px;
+      object-fit: contain;
+      background: #05060b;
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+    .tag-row {
+      font-size: 12px;
+      color: #d2d7ff;
+      margin-top: 4px;
+    }
+    .tag-pill {
+      display: inline-block;
+      padding: 2px 6px;
+      margin: 2px 4px 0 0;
+      border-radius: 999px;
+      background: #252b3f;
+      font-size: 11px;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 8px;
+    }
+    .metric-row {
+      font-size: 11px;
+      color: #d8ddff;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2px;
+    }
+    .bar {
+      height: 4px;
+      border-radius: 999px;
+      background: #181b24;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+    .bar-inner {
+      height: 100%;
+      background: linear-gradient(90deg, #46d4ff, #3a7afe);
+    }
+    .inline {
+      display: inline-flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .small {
+      font-size: 11px;
+      color: #b4bcdf;
+    }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 11px;
+      padding: 6px;
+      border-radius: 6px;
+      background: #05060b;
+      border: 1px solid #272b3a;
+      margin-top: 4px;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+    .history-list {
+      max-height: 160px;
+      overflow-y: auto;
+      font-size: 11px;
+    }
+    .history-item {
+      padding: 4px 6px;
+      border-radius: 4px;
+      border: 1px solid #262b3e;
+      margin-bottom: 4px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+    .history-item span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .badge {
+      font-size: 10px;
+      padding: 1px 5px;
+      border-radius: 999px;
+      background: #1b2030;
+      color: #cad4ff;
+    }
+    @media (max-width: 600px) {
+      .grid-2 {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="app">
+    <header style="margin-bottom: 8px;">
+      <h1>🎭 Character Roleplay Studio v1.0</h1>
+      <div class="subtitle">
+        Image ➜ Tags ➜ Psychology ➜ SD Prompt ➜ Roleplay, fully local & API‑free.
+      </div>
+    </header>
+
+    <!-- IMAGE INPUT -->
+    <div class="panel">
+      <div class="panel-header-row">
+        <h2>📷 Image Input</h2>
+        <span class="small">Paste character art URL (E621, anime, game, etc.)</span>
+      </div>
+      <input
+        type="text"
+        v-model="imageUrl"
+        placeholder="https://static1.e621.net/data/92/fa/92fa07325cd1c55d75e9be7e05408b68.jpg"
+      />
+      <div class="inline">
+        <button @click="handleImageUrlSubmit" :disabled="loadingImage">
+          <span v-if="!loadingImage">Analyze Image</span>
+          <span v-else>Loading…</span>
+        </button>
+        <button class="ghost secondary" @click="resetAll">Reset</button>
+      </div>
+      <div class="status">{{ imageStatus }}</div>
+      <img ref="previewImage" class="preview" v-if="hasPreview" />
+    </div>
+
+    <!-- CHARACTER DETECTION -->
+    <div class="panel" v-if="characterName">
+      <div class="panel-header-row">
+        <h2>🕵️ Character Detection</h2>
+        <span class="small">
+          {{ characterName }} <span v-if="franchise">({{ franchise }})</span>
+          • Confidence: {{ (confidence * 100).toFixed(0) }}%
+        </span>
+      </div>
+      <div class="tag-row" v-if="resolvedTags.length">
+        <strong>🏷️ Tags:</strong>
+        <span
+          class="tag-pill"
+          v-for="tag in resolvedTags"
+          :key="tag"
+        >{{ tag }}</span>
+      </div>
+      <div class="tag-row">
+        <strong>Raw Tag Input:</strong>
+        <textarea
+          v-model="userTags"
+          placeholder="Optional: add or edit tags (comma or space separated)…"
+        ></textarea>
+        <button class="secondary" @click="applyUserTags">Apply Tags</button>
+      </div>
+    </div>
+
+    <!-- PSYCHOLOGY ANALYZER -->
+    <div class="panel" v-if="characterName">
+      <div class="panel-header-row">
+        <h2>🧠 Psychology Analyzer</h2>
+        <span class="small">
+          Mode:
+          <label style="margin-left: 4px;">
+            <input type="radio" value="canon" v-model="psychMode" /> Canon‑Only
+          </label>
+          <label style="margin-left: 8px;">
+            <input type="radio" value="whatif" v-model="psychMode" /> What‑If?
+          </label>
+        </span>
+      </div>
+
+      <div v-if="psychMode === 'whatif'" style="margin: 4px 0 6px;">
+        <textarea
+          v-model="whatIfScenario"
+          placeholder="Describe a what‑if scenario (e.g., 'Judy is a noir detective in a cyberpunk city')…"
+        ></textarea>
+      </div>
+
+      <div class="grid-2" style="margin-top: 6px;">
+        <div>
+          <div
+            class="metric-row"
+            v-for="p in psychology.dimensions"
+            :key="p.name"
+          >
+            <span>{{ p.name }}</span>
+            <span>{{ p.score.toFixed(1) }}/10</span>
+          </div>
+          <div
+            class="bar"
+            v-for="p in psychology.dimensions"
+            :key="p.name + '-bar'"
+          >
+            <div
+              class="bar-inner"
+              :style="{ width: (p.score * 10) + '%' }"
+            ></div>
+          </div>
+        </div>
+        <div>
+          <div class="small">
+            <strong>Profile Summary:</strong><br />
+            {{ psychology.summary }}
+          </div>
+          <div class="small" style="margin-top: 6px;">
+            <strong>Voice Pattern:</strong><br />
+            {{ psychology.voice }}
+          </div>
+          <div class="small" style="margin-top: 6px;">
+            <strong>Current Mood:</strong><br />
+            {{ psychology.mood }}
+          </div>
+          <div class="small" style="margin-top: 6px;">
+            <strong>Top Compatibilities:</strong><br />
+            <span v-for="c in psychology.compat" :key="c.name">
+              {{ c.name }} ({{ (c.score * 100).toFixed(0) }}%)<span v-if="!">, </span>
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="status" style="margin-top: 6px;">
+        Psychosexual / relational themes: {{ psychology.psychosexual }}
+      </div>
+    </div>
+
+    <!-- EXPORT PANEL -->
+    <div class="panel" v-if="characterName">
+      <div class="panel-header-row">
+        <h2>💾 Export & Roleplay</h2>
+        <span class="small">Copy prompts into Draw Things or any LLM.</span>
+      </div>
+
+      <div style="margin-top: 4px;">
+        <strong class="small">📝 Roleplay Prompt</strong>
+        <div class="mono">{{ roleplayPrompt }}</div>
+        <button class="secondary" @click="copyText(roleplayPrompt)">📋 Copy RP Prompt</button>
+      </div>
+
+      <div style="margin-top: 10px;">
+        <strong class="small">🎨 SD 1.5 Prompt (Draw Things)</strong>
+        <div class="mono">{{ sdPrompt }}</div>
+        <div class="inline">
+          <button class="secondary" @click="copyText(sdPrompt)">📋 Copy SD Prompt</button>
+          <button @click="simulateDrawThingsLaunch">
+            🔥 Generate in Draw Things ⬆
+          </button>
+        </div>
+        <div class="status">{{ drawThingsStatus }}</div>
+      </div>
+
+      <div style="margin-top: 10px;">
+        <strong class="small">📊 Tag Export (CSV)</strong>
+        <div class="mono">{{ csvTags }}</div>
+        <button class="secondary" @click="copyText(csvTags)">📋 Copy Tag CSV</button>
+      </div>
+
+      <div style="margin-top: 10px;">
+        <strong class="small">🧾 Character Card (JSON)</strong>
+        <div class="mono">{{ characterCardJson }}</div>
+        <button class="secondary" @click="copyText(characterCardJson)">📋 Copy JSON</button>
+      </div>
+    </div>
+
+    <!-- GENERATED PREVIEW + HISTORY -->
+    <div class="grid-2">
+      <div class="panel">
+        <div class="panel-header-row">
+          <h2>🖼️ Generated Preview</h2>
+          <span class="small">Paste from Draw Things clipboard to display.</span>
+        </div>
+        <div class="status">{{ clipboardStatus }}</div>
+        <!-- Placeholder: user can manually paste or drag‑drop in future extension -->
+        <div class="small" style="margin-top: 6px;">
+          This version stubs clipboard image detection for safety in static hosting.
+          Use the copied SD prompt in Draw Things, then manually paste/export the result.
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header-row">
+          <h2>🕒 History</h2>
+          <span class="small">{{ history.length }} saved</span>
+        </div>
+        <div class="history-list" v-if="history.length">
+          <div
+            class="history-item"
+            v-for="item in history"
+            :key="item.id"
+            @click="loadFromHistory(item.id)"
+          >
+            <span>
+              {{ item.character }}<span v-if="item.franchise"> ({{ item.franchise }})</span>
+            </span>
+            <span class="badge">{{ item.timestamp }}</span>
+          </div>
+        </div>
+        <div class="small" v-else>No history yet.</div>
+        <button
+          class="ghost secondary"
+          style="margin-top: 8px;"
+          @click="clearHistory"
+          :disabled="!history.length"
+        >
+          🗑️ Clear History
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <script>
+    // ---------- Local Character Database (extensible) ----------
+    const CHARACTER_DB = [
+      {
+        name: "Judy Hopps",
+        franchise: "Zootopia",
+        aliases: ["judy", "judy_hopps", "bunny cop", "rabbit cop"],
+        tags: ["rabbit", "bunny", "police", "cop", "fluffy", "optimistic", "determined"],
+        basePsych: {
+          optimism: 9.5,
+          determination: 10,
+          empathy: 8.5,
+          impulsivity: 6.0,
+          dominance: 6.0,
+          playfulness: 8.0,
+          introversion: 3.0,
+          conscientiousness: 8.8,
+          sensuality: 4.0,
+          risk: 7.0,
+        },
+        voice: "bright, energetic, hopeful, speaks quickly with earnest determination.",
+        psychosexual: "Primarily romantic and idealistic; tends toward nurturing, service‑oriented dynamics rather than overt eroticism.",
+        compat: [
+          { name: "Nick Wilde", score: 0.95 },
+          { name: "Chief Bogo", score: 0.82 },
+          { name: "Clawhauser", score: 0.78 },
+        ],
+      },
+      {
+        name: "Nick Wilde",
+        franchise: "Zootopia",
+        aliases: ["nick", "nick_wilde", "fox conman"],
+        tags: ["fox", "conman", "sly", "streetwise"],
+        basePsych: {
+          optimism: 7.0,
+          determination: 7.5,
+          empathy: 7.0,
+          impulsivity: 5.5,
+          dominance: 7.0,
+          playfulness: 7.5,
+          introversion: 4.0,
+          conscientiousness: 5.0,
+          sensuality: 6.0,
+          risk: 7.0,
+        },
+        voice: "laid‑back, sardonic, gently teasing with a soft but self‑assured cadence.",
+        psychosexual: "Prefers slow‑burn intimacy grounded in trust and banter; wary of vulnerability but deeply loyal once committed.",
+        compat: [
+          { name: "Judy Hopps", score: 0.95 },
+          { name: "Finnick", score: 0.8 },
+        ],
+      },
+      {
+        name: "Rem",
+        franchise: "Re:Zero",
+        aliases: ["rem", "oni maid"],
+        tags: ["maid", "oni", "blue hair", "devoted"],
+        basePsych: {
+          optimism: 6.5,
+          determination: 9.0,
+          empathy: 9.5,
+          impulsivity: 4.0,
+          dominance: 3.5,
+          playfulness: 5.0,
+          introversion: 6.5,
+          conscientiousness: 9.2,
+          sensuality: 6.5,
+          risk: 5.0,
+        },
+        voice: "soft‑spoken, formal yet warm, with occasional spikes of intensity.",
+        psychosexual: "Deeply devoted and self‑sacrificing; intimacy is fused with loyalty, caretaking, and quiet yearning.",
+        compat: [
+          { name: "Subaru Natsuki", score: 0.96 },
+          { name: "Ram", score: 0.85 },
+        ],
+      },
+      {
+        name: "2B",
+        franchise: "NieR: Automata",
+        aliases: ["2b", "yoRHa No.2 Type B"],
+        tags: ["android", "combat", "blindfold", "gothic"],
+        basePsych: {
+          optimism: 4.0,
+          determination: 9.5,
+          empathy: 6.5,
+          impulsivity: 4.5,
+          dominance: 7.5,
+          playfulness: 3.0,
+          introversion: 7.5,
+          conscientiousness: 9.0,
+          sensuality: 7.0,
+          risk: 7.0,
+        },
+        voice: "cool, controlled, clipped; emotional undercurrent restrained behind protocol.",
+        psychosexual: "Struggles to reconcile duty and desire; control, restraint, and slow cracks in the armor define her intimacy.",
+        compat: [
+          { name: "9S", score: 0.94 },
+          { name: "A2", score: 0.82 },
+        ],
+      },
+      {
+        name: "Asuka Langley Soryu",
+        franchise: "Neon Genesis Evangelion",
+        aliases: ["asuka", "asuka langley"],
+        tags: ["tsundere", "pilot", "red hair"],
+        basePsych: {
+          optimism: 5.0,
+          determination: 9.0,
+          empathy: 5.5,
+          impulsivity: 8.0,
+          dominance: 8.5,
+          playfulness: 6.0,
+          introversion: 4.0,
+          conscientiousness: 6.0,
+          sensuality: 6.0,
+          risk: 8.0,
+        },
+        voice: "sharp, loud, defensive, laced with vulnerability beneath bravado.",
+        psychosexual: "Oscillates between aggressive pursuit and avoidance; intimacy triggers insecurity and a need to prove herself.",
+        compat: [
+          { name: "Shinji Ikari", score: 0.78 },
+          { name: "Misato Katsuragi", score: 0.82 },
+        ],
+      },
+      {
+        name: "Aloy",
+        franchise: "Horizon Zero Dawn",
+        aliases: ["aloy"],
+        tags: ["hunter", "archer", "post‑apocalyptic", "red hair"],
+        basePsych: {
+          optimism: 7.5,
+          determination: 9.5,
+          empathy: 8.0,
+          impulsivity: 5.5,
+          dominance: 7.0,
+          playfulness: 5.0,
+          introversion: 5.0,
+          conscientiousness: 8.5,
+          sensuality: 5.5,
+          risk: 7.5,
+        },
+        voice: "pragmatic, grounded, mildly wry; quick to observe and slow to trust.",
+        psychosexual: "Values competence and mutual respect; intimacy is earned through shared trials and emotional honesty.",
+        compat: [
+          { name: "Varl", score: 0.82 },
+          { name: "Erend", score: 0.78 },
+        ],
+      },
+    ];
+
+    // ---------- Utility: Tiered Image Loader ----------
+    function buildImageUrlTiers(rawUrl) {
+      const baseUrl = rawUrl.split('#')[0]; // strip fragments
+      const now = Date.now();
+
+      const tier1 = baseUrl + (baseUrl.includes('?') ? '&' : '?') + 't=' + now;
+      const tier2 = baseUrl + (baseUrl.includes('?') ? '&' : '?') + 't=' + (now + 1);
+
+      const corsProxy = 'https://cors-anywhere.herokuapp.com/';
+      const tier3 = corsProxy + baseUrl;
+
+      return [tier1, tier2, tier3];
+    }
+
+    function trySetImageSrc(url, imgElement) {
+      return new Promise((resolve, reject) => {
+        imgElement.onload = () => resolve(url);
+        imgElement.onerror = () => reject(new Error('Image load error: ' + url));
+        imgElement.src = url;
+      });
+    }
+
+    async function loadImageWithTiers(rawUrl, imgElement, onStatus) {
+      const urls = buildImageUrlTiers(rawUrl);
+      let lastError = null;
+
+      for (let i = 0; i < urls.length; i++) {
+        const url = urls[i];
+
+        if (i === 0) onStatus('Trying direct image (cache-busting v1)…');
+        else if (i === 1) onStatus('Retrying direct image (cache-busting v2)…');
+        else onStatus('Using CORS proxy fallback (may be slower)…');
+
+        try {
+          const finalUrl = await trySetImageSrc(url, imgElement);
+          onStatus('✅ Image loaded successfully.');
+          return finalUrl;
+        } catch (err) {
+          lastError = err;
+          continue;
+        }
+      }
+
+      onStatus('❌ Failed to load image after all fallbacks.');
+      throw lastError;
+    }
+
+    // ---------- Utility: Text & Tag Helpers ----------
+    function normalizeText(s) {
+      return (s || '').toLowerCase();
+    }
+
+    function tokenizeTagsFromUrl(url) {
+      const lower = normalizeText(url);
+      const separators = /[\/_\-\.\?\&=]/g;
+      return lower
+        .split(separators)
+        .filter(Boolean)
+        .filter((t) => t.length >= 3);
+    }
+
+    function parseUserTags(raw) {
+      if (!raw) return [];
+      return raw
+        .split(/[\s,]+/g)
+        .map((t) => t.trim())
+        .filter((t) => t.length > 0);
+    }
+
+    function unique(arr) {
+      return Array.from(new Set(arr));
+    }
+
+    function clamp(v, min, max) {
+      return Math.min(max, Math.max(min, v));
+    }
+
+    // ---------- Psychology Engine ----------
+    function findBestCharacter(tokens) {
+      let best = null;
+      let bestScore = 0;
+
+      const tokenSet = new Set(tokens);
+
+      for (const c of CHARACTER_DB) {
+        let score = 0;
+        for (const alias of c.aliases) {
+          if (tokenSet.has(normalizeText(alias))) score += 3;
+        }
+        for (const tag of c.tags) {
+          if (tokenSet.has(normalizeText(tag))) score += 1;
+        }
+        if (score > bestScore) {
+          bestScore = score;
+          best = c;
+        }
+      }
+
+      if (!best || bestScore < 2) return null;
+      // Map rough score to a 0-1 confidence
+      const confidence = Math.min(1, bestScore / 10);
+      return { character: best, confidence };
+    }
+
+    function derivePsychology(basePsych, tags, mode, scenarioText) {
+      const tset = new Set(tags.map((t) => normalizeText(t)));
+      const p = { ...basePsych };
+
+      // Simple tag-based adjustments
+      if (tset.has("angry") || tset.has("rage") || tset.has("battle")) {
+        p.impulsivity += 1.0;
+        p.risk += 0.8;
+      }
+      if (tset.has("nsfw") || tset.has("nude") || tset.has("lewd")) {
+        p.sensuality += 1.2;
+      }
+      if (tset.has("comfort") || tset.has("hug") || tset.has("cuddle")) {
+        p.empathy += 0.7;
+      }
+      if (tset.has("dom") || tset.has("dominant")) {
+        p.dominance += 1.0;
+      }
+      if (tset.has("sub") || tset.has("submissive")) {
+        p.dominance -= 1.0;
+      }
+
+      // What-if mode: tilt slightly toward scenario tone
+      let scenarioMoodHint = "";
+      if (mode === "whatif" && scenarioText) {
+        const s = normalizeText(scenarioText);
+        if (s.includes("noir") || s.includes("cyberpunk") || s.includes("crime")) {
+          p.risk += 1.0;
+          p.dominance += 0.5;
+          scenarioMoodHint = "noir, high‑stakes ambience";
+        } else if (s.includes("slice of life") || s.includes("domestic")) {
+          p.empathy += 0.7;
+          p.playfulness += 0.4;
+          scenarioMoodHint = "soft, domestic slice‑of‑life tone";
+        } else if (s.includes("angst") || s.includes("hurt") || s.includes("betrayal")) {
+          p.optimism -= 1.0;
+          p.empathy += 0.5;
+          scenarioMoodHint = "angsty, emotionally heavy undertones";
+        }
+      }
+
+      // Clamp values
+      for (const key of Object.keys(p)) {
+        p[key] = clamp(p[key], 0, 10);
+      }
+
+      const dims = [
+        { name: "Optimism", key: "optimism" },
+        { name: "Determination", key: "determination" },
+        { name: "Empathy", key: "empathy" },
+        { name: "Impulsivity", key: "impulsivity" },
+        { name: "Dominance", key: "dominance" },
+        { name: "Playfulness", key: "playfulness" },
+        { name: "Introversion", key: "introversion" },
+        { name: "Conscientiousness", key: "conscientiousness" },
+        { name: "Sensuality", key: "sensuality" },
+        { name: "Risk Appetite", key: "risk" },
+      ].map((d) => ({
+        name: d.name,
+        score: p[d.key],
+      }));
+
+      // Very lightweight mood / summary heuristics
+      let mood = "";
+      if (p.optimism >= 8 && p.determination >= 8) mood = "brightly hopeful and driven";
+      else if (p.sensuality >= 7 && p.dominance >= 7) mood = "charged, controlled, and quietly intense";
+      else if (p.empathy >= 8 && p.conscientiousness >= 8) mood = "gentle, attentive, and caretaking";
+      else if (p.risk >= 7) mood = "restless, thrill‑seeking, and kinetic";
+      else mood = "steady and responsive to context";
+
+      const summaryParts = [];
+      if (p.optimism >= 8) summaryParts.push("strongly optimistic");
+      if (p.determination >= 8) summaryParts.push("relentlessly determined");
+      if (p.empathy >= 8) summaryParts.push("deeply empathetic");
+      if (p.dominance >= 7) summaryParts.push("assertive, comfortable leading");
+      if (p.playfulness >= 7) summaryParts.push("playful and teasing");
+      if (p.introversion >= 7) summaryParts.push("quiet, reflective, reserved");
+      if (summaryParts.length === 0) summaryParts.push("balanced and context‑sensitive");
+
+      const summary =
+        summaryParts.join(", ") +
+        (mode === "whatif" && scenarioMoodHint
+          ? `, recontextualized into .`
+          : ".");
+
+      let psychosexualNote =
+        "Intimacy expresses their core traits rather than contradicting them; expect continuity between everyday behavior and romantic or erotic dynamics.";
+      if (p.sensuality >= 7 && p.dominance >= 7) {
+        psychosexualNote =
+          "Intimacy skews toward deliberate tension, power‑aware dynamics, and slow escalation; control and consent are foregrounded.";
+      } else if (p.empathy >= 8 && p.sensuality <= 6) {
+        psychosexualNote =
+          "Intimacy is primarily caretaking and emotionally secure, with physicality framed as an extension of safety and trust.";
+      } else if (p.risk >= 7) {
+        psychosexualNote =
+          "Intimacy can entwine with thrill‑seeking; boundaries and stakes should be made explicit to avoid reckless overreach.";
+      }
+
+      return {
+        dimensions: dims,
+        mood,
+        summary,
+        psychosexual: psychosexualNote,
+      };
+    }
+
+    function buildRoleplayPrompt(character, franchise, psych, mood, tags, mode, scenarioText) {
+      const namePart = franchise
+        ? ` from `
+        : character;
+      let base =
+        `You are . ` +
+        `Psychology:  Key traits across 10 dimensions: ` +
+        psych.dimensions
+          .map((d) => ` /10`)
+          .join(", ") +
+        `. ` +
+        `You speak with a voice that is . ` +
+        `Current mood: . ` +
+        `Psychosexual / relational lens:  `;
+
+      if (mode === "whatif" && scenarioText) {
+        base +=
+          `This interaction takes place in a 'what‑if' scenario:  ` +
+          `Stay internally consistent as that version of the character while preserving core psychological anchors. `;
+      } else {
+        base +=
+          `Remain faithful to canonical characterization while allowing naturalistic emotional growth over the scene. `;
+      }
+
+      if (tags && tags.length) {
+        base +=
+          `Visual / contextual cues from the reference image: . `;
+      }
+
+      base +=
+        `Avoid narrating the other party's internal state; show your own thoughts, bodily sensations, and micro‑reactions instead.`;
+
+      return base;
+    }
+
+    function buildSdPrompt(character, franchise, tags) {
+      const coreName = character.replace(/\s+/g, "_");
+      const baseTags = [
+        `(:1.2)`,
+        franchise ? franchise.replace(/\s+/g, "_") : "",
+      ].filter(Boolean);
+
+      const styleTags = [
+        "highly_detailed",
+        "cinematic_lighting",
+        "dynamic_pose",
+        "sharp_focus",
+        "illustration",
+      ];
+
+      const filteredTags = tags.filter(
+        (t) =>
+          !["safe", "rating:safe", "solo"].includes(t.toLowerCase())
+      );
+
+      const all = [...baseTags, ...filteredTags, ...styleTags];
+      return all.join(", ");
+    }
+
+    function buildCompatList(characterEntry) {
+      return characterEntry.compat || [];
+    }
+
+    function buildCharacterCard({
+      imageUrl,
+      character,
+      franchise,
+      tags,
+      psych,
+      mode,
+      scenarioText,
+      compat,
+    }) {
+      return {
+        name: character,
+        franchise: franchise || null,
+        image_url: imageUrl,
+        tags,
+        mode,
+        what_if: mode === "whatif" ? scenarioText || null : null,
+        psychology: {
+          dimensions: psych.dimensions,
+          mood: psych.mood,
+          summary: psych.summary,
+          psychosexual: psych.psychosexual,
+        },
+        compat,
+        meta: {
+          generated_at: new Date().toISOString(),
+          engine: "Character Roleplay Studio v1.0 (local heuristic)",
+        },
+      };
+    }
+
+    // ---------- Vue App ----------
+    const app = Vue.createApp({
+      data() {
+        return {
+          imageUrl: "",
+          imageStatus: "",
+          loadingImage: false,
+          hasPreview: false,
+          resolvedImageUrl: null,
+
+          characterName: "",
+          franchise: "",
+          confidence: 0,
+          resolvedTags: [],
+          userTags: "",
+
+          psychMode: "canon",
+          whatIfScenario: "",
+          psychology: {
+            dimensions: [],
+            summary: "",
+            mood: "",
+            psychosexual: "",
+            voice: "",
+            compat: [],
+          },
+
+          drawThingsStatus: "",
+          clipboardStatus: "Clipboard monitoring is stubbed in this static build.",
+          history: [],
+        };
+      },
+      computed: {
+        roleplayPrompt() {
+          if (!this.characterName) return "";
+          return buildRoleplayPrompt(
+            this.characterName,
+            this.franchise,
+            this.psychology,
+            this.psychology.mood,
+            this.resolvedTags,
+            this.psychMode,
+            this.whatIfScenario
+          );
+        },
+        sdPrompt() {
+          if (!this.characterName) return "";
+          return buildSdPrompt(
+            this.characterName,
+            this.franchise,
+            this.resolvedTags
+          );
+        },
+        csvTags() {
+          if (!this.resolvedTags.length) return "";
+          return this.resolvedTags.join(", ");
+        },
+        characterCardJson() {
+          if (!this.characterName) return "";
+          const card = buildCharacterCard({
+            imageUrl: this.resolvedImageUrl || this.imageUrl,
+            character: this.characterName,
+            franchise: this.franchise,
+            tags: this.resolvedTags,
+            psych: this.psychology,
+            mode: this.psychMode,
+            scenarioText: this.whatIfScenario,
+            compat: this.psychology.compat,
+          });
+          return JSON.stringify(card, null, 2);
+        },
+      },
+      created() {
+        this.loadHistory();
+      },
+      methods: {
+        async handleImageUrlSubmit() {
+          const url = this.imageUrl.trim();
+          if (!url) {
+            this.imageStatus = "Please enter an image URL.";
+            return;
+          }
+          if (!/^https?:\/\//i.test(url)) {
+            this.imageStatus = "URL must start with http:// or https://";
+            return;
+          }
+          const imgEl = this..previewImage;
+          if (!imgEl) return;
+
+          this.loadingImage = true;
+          this.hasPreview = false;
+          this.imageStatus = "Loading image…";
+
+          try {
+            const finalUrl = await loadImageWithTiers(
+              url,
+              imgEl,
+              (msg) => (this.imageStatus = msg)
+            );
+            this.resolvedImageUrl = finalUrl;
+            this.hasPreview = true;
+
+            // Pipeline: detect character, tags, psychology, prompts
+            this.analyzeCharacterFromImage(finalUrl);
+          } catch (e) {
+            console.error(e);
+          } finally {
+            this.loadingImage = false;
+          }
+        },
+
+        analyzeCharacterFromImage(finalUrl) {
+          const urlTokens = tokenizeTagsFromUrl(finalUrl);
+          const userTagTokens = parseUserTags(this.userTags);
+          const allTokens = unique([...urlTokens, ...userTagTokens]);
+          const best = findBestCharacter(allTokens);
+
+          let charEntry = null;
+          if (best) {
+            this.characterName = best.character.name;
+            this.franchise = best.character.franchise;
+            this.confidence = best.confidence;
+            charEntry = best.character;
+          } else {
+            // Fallback: generic character
+            this.characterName = "Original Character";
+            this.franchise = "";
+            this.confidence = 0.5;
+            charEntry = {
+              name: "Original Character",
+              franchise: "",
+              basePsych: {
+                optimism: 7,
+                determination: 7,
+                empathy: 7,
+                impulsivity: 5,
+                dominance: 5,
+                playfulness: 5,
+                introversion: 5,
+                conscientiousness: 7,
+                sensuality: 5,
+                risk: 5,
+              },
+              voice: "natural, conversational, slightly heightened for dramatic effect.",
+              psychosexual:
+                "Adapts to partner preference; tends toward balanced exploration grounded in communication.",
+              compat: [],
+              tags: [],
+            };
+          }
+
+          // Build tags union
+          const autoTags = unique([
+            ...urlTokens,
+            ...userTagTokens,
+            ...(charEntry.tags || []),
+          ]);
+          this.resolvedTags = autoTags;
+
+          // Psychology
+          const psych = derivePsychology(
+            charEntry.basePsych,
+            this.resolvedTags,
+            this.psychMode,
+            this.whatIfScenario
+          );
+          const compat = buildCompatList(charEntry);
+
+          this.psychology = {
+            ...psych,
+            voice: charEntry.voice,
+            compat,
+          };
+
+          // Save to history
+          this.saveToHistory({
+            imageUrl: finalUrl,
+            character: this.characterName,
+            franchise: this.franchise,
+            tags: this.resolvedTags,
+          });
+        },
+
+        applyUserTags() {
+          if (!this.characterName && !this.hasPreview) {
+            this.imageStatus =
+              "Apply tags after loading an image or detecting a character.";
+            return;
+          }
+          const userTagTokens = parseUserTags(this.userTags);
+          const merged = unique([...this.resolvedTags, ...userTagTokens]);
+          this.resolvedTags = merged;
+
+          // Re‑derive psychology with new tags
+          const charEntry =
+            CHARACTER_DB.find((c) => c.name === this.characterName) || null;
+          const basePsych =
+            charEntry?.basePsych ||
+            {
+              optimism: 7,
+              determination: 7,
+              empathy: 7,
+              impulsivity: 5,
+              dominance: 5,
+              playfulness: 5,
+              introversion: 5,
+              conscientiousness: 7,
+              sensuality: 5,
+              risk: 5,
+            };
+          const psych = derivePsychology(
+            basePsych,
+            this.resolvedTags,
+            this.psychMode,
+            this.whatIfScenario
+          );
+          const compat = charEntry ? buildCompatList(charEntry) : [];
+          this.psychology = {
+            ...psych,
+            voice:
+              charEntry?.voice ||
+              "natural, conversational, slightly heightened for dramatic effect.",
+            compat,
+          };
+        },
+
+        simulateDrawThingsLaunch() {
+          this.drawThingsStatus =
+            "Copy the SD prompt, paste it into Draw Things, generate, then bring the image back into your workflow.";
+          // If you want to experiment with a URL scheme locally, you can uncomment:
+          // const url = "drawthings://generate?prompt=" + encodeURIComponent(this.sdPrompt);
+          // window.location.href = url;
+        },
+
+        copyText(text) {
+          if (!navigator.clipboard) {
+            alert("Clipboard API not available in this browser.");
+            return;
+          }
+          navigator.clipboard
+            .writeText(text)
+            .then(() => {
+              this.clipboardStatus = "Copied to clipboard.";
+              setTimeout(() => {
+                if (this.clipboardStatus === "Copied to clipboard.") {
+                  this.clipboardStatus = "Clipboard monitoring is stubbed in this static build.";
+                }
+              }, 1500);
+            })
+            .catch(() => {
+              this.clipboardStatus = "Failed to copy to clipboard.";
+            });
+        },
+
+        resetAll() {
+          this.imageUrl = "";
+          this.imageStatus = "";
+          this.loadingImage = false;
+          this.hasPreview = false;
+          this.resolvedImageUrl = null;
+
+          this.characterName = "";
+          this.franchise = "";
+          this.confidence = 0;
+          this.resolvedTags = [];
+          this.userTags = "";
+          this.psychMode = "canon";
+          this.whatIfScenario = "";
+          this.psychology = {
+            dimensions: [],
+            summary: "",
+            mood: "",
+            psychosexual: "",
+            voice: "",
+            compat: [],
+          };
+          this.drawThingsStatus = "";
+          this.clipboardStatus = "Clipboard monitoring is stubbed in this static build.";
+        },
+
+        // ----- History -----
+        loadHistory() {
+          try {
+            const raw = localStorage.getItem("crs_history_v1");
+            if (!raw) {
+              this.history = [];
+              return;
+            }
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) this.history = parsed;
+            else this.history = [];
+          } catch {
+            this.history = [];
+          }
+        },
+        saveHistory() {
+          localStorage.setItem("crs_history_v1", JSON.stringify(this.history));
+        },
+        saveToHistory(entry) {
+          const id = Date.now().toString(36);
+          const item = {
+            id,
+            timestamp: new Date().toLocaleTimeString(),
+            imageUrl: entry.imageUrl,
+            character: entry.character,
+            franchise: entry.franchise,
+            tags: entry.tags,
+          };
+          this.history.unshift(item);
+          if (this.history.length > 20) this.history.pop();
+          this.saveHistory();
+        },
+        loadFromHistory(id) {
+          const item = this.history.find((h) => h.id === id);
+          if (!item) return;
+          this.imageUrl = item.imageUrl;
+          this.userTags = item.tags.join(", ");
+          this.handleImageUrlSubmit();
+        },
+        clearHistory() {
+          if (!confirm("Clear all history entries?")) return;
+          this.history = [];
+          this.saveHistory();
+        },
+      },
+    });
+
+    app.mount("#app");
+  </script>
+</body>
+</html>
